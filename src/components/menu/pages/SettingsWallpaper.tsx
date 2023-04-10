@@ -11,22 +11,22 @@ function SettingsWallpaper() {
     const sliderValueFormat = (value: number) => `${value > 0 ? '+' : ''}${value}%`;
 
     const [screens, setScreens] = useState<{ screen: Display, wallpaper: Wallpaper }[]>([])
-    const [activeScreen, setActiveScreen] = useState<Display>();
+    const [activeScreen, setActiveScreen] = useState<Display | null>(null);
 
-    const updateScreens = () => {
+    const updateScreens = (init: boolean) => {
         ipcRenderer.invoke('get-screens').then(screenList => {
             setScreens(screenList)
 
-            if (!activeScreen) {
+            if (init) {
                 setActiveScreen(screenList[0].screen)
             }
         })
     }
 
     useEffect(() => {
-        updateScreens()
+        updateScreens(true)
         ipcRenderer.on('screens-change', (e, data) => {
-            updateScreens();
+            updateScreens(false);
         });
 
         return () => {
@@ -41,9 +41,7 @@ function SettingsWallpaper() {
 
     ]
     const changeWallpaper = () => {
-        ipcRenderer.invoke('set-wallpaper', activeScreen).then(() => {
-            console.log('CHANGED')
-        })
+        ipcRenderer.invoke('set-wallpaper', activeScreen);
     }
 
     return (<div className="flex flex-col overflow-hidden gap-y-6">

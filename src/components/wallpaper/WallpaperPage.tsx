@@ -12,7 +12,7 @@ function WallpaperPage() {
     useEffect(() => {
         getWallpaper();
         ipcRenderer.on('wallpaper-changed', () => getWallpaper())
-    })
+    }, [])
 
     return <WallpaperRendererHandler wallpaper={wallpaper} />
 }

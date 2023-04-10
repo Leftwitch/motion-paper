@@ -9,7 +9,7 @@ const preload = join(__dirname, "../preload/index.js");
 
 export class SettingsWindow {
   private _initialized = false;
-  private _window: BrowserWindow | null = null;
+  public window: BrowserWindow | null = null;
   private windowsRegistryCache?: { [key: string]: RegistryItemValue };
 
   initialize() {
@@ -18,10 +18,10 @@ export class SettingsWindow {
     }
     this.createBrowserWindow();
     this.registerIPCHandlers();
-    this._window?.focus();
+    this.window?.focus();
     this._initialized = true;
     const emitUpdateEvent = () =>
-      this._window?.webContents.send("screens-change", {});
+      this.window?.webContents.send("screens-change", {});
 
     //TODO UNREGISTER
     screen.on("display-added", () => emitUpdateEvent());
@@ -32,15 +32,15 @@ export class SettingsWindow {
   }
 
   registerIPCHandlers() {
-    this._window?.webContents.ipc.handle("window-mode", (event) => {
+    this.window?.webContents.ipc.handle("window-mode", (event) => {
       return "settings";
     });
 
-    this._window?.webContents.ipc.handle("get-registry", (event) => {
+    this.window?.webContents.ipc.handle("get-registry", (event) => {
       return this.windowsRegistryCache;
     });
 
-    this._window?.webContents.ipc.handle("update-registry", (event, data) => {
+    this.window?.webContents.ipc.handle("update-registry", (event, data) => {
       regedit.putValue({
         "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize":
           {
@@ -48,7 +48,7 @@ export class SettingsWindow {
           },
       });
     });
-    this._window?.webContents.ipc.handle("get-screens", (event) => {
+    this.window?.webContents.ipc.handle("get-screens", (event) => {
       const screens = screen.getAllDisplays();
       return screens.map((screen) => ({
         screen,
@@ -56,7 +56,7 @@ export class SettingsWindow {
       }));
     });
 
-    this._window?.webContents.ipc.handle("set-wallpaper", (event, display) => {
+    this.window?.webContents.ipc.handle("set-wallpaper", (event, display) => {
       this.selectNewWallpaper(display);
     });
   }
@@ -69,7 +69,7 @@ export class SettingsWindow {
       if (JSON.stringify(this.windowsRegistryCache) != JSON.stringify(values)) {
         console.log("CHANGE EVNT");
         this.windowsRegistryCache = values;
-        this._window?.webContents.send(
+        this.window?.webContents.send(
           "registry-change",
           values,
         );
@@ -78,7 +78,7 @@ export class SettingsWindow {
   }
 
   createBrowserWindow() {
-    this._window = new BrowserWindow({
+    this.window = new BrowserWindow({
       title: app.getName() + "- Window",
       icon: join(process.env.PUBLIC, "favicon.ico"),
       webPreferences: {
@@ -89,6 +89,7 @@ export class SettingsWindow {
       },
       width: 1280,
       height: 720,
+      show: false,
       vibrancy: {
         theme: "#21001E63",
         effect: "acrylic",
@@ -96,18 +97,22 @@ export class SettingsWindow {
         maximumRefreshRate: 60,
       },
     });
+    this.window.on("close", (evt) => {
+      evt.preventDefault();
+      this.window?.hide();
+    });
 
     if (browserUrl) {
       console.log(browserUrl);
-      this._window.loadURL(browserUrl);
+      this.window.loadURL(browserUrl);
+      this.window.webContents.openDevTools();
     } else {
-      //TODO index.html loading
+      this.window.loadFile(join(process.env.DIST, "index.html"));
     }
-    this._window.webContents.openDevTools();
   }
 
   async selectNewWallpaper(display: Display) {
-    if (!this._window) return;
+    if (!this.window) return;
     const imageExtensions = ["jpg", "png", "gif", "svg"];
     const videoExtensions = ["mkv", "avi", "mp4", "webm"];
     const splineExtensions = ["splinecode"];
@@ -125,6 +130,7 @@ export class SettingsWindow {
       ],
     });
 
+    if (filePickerResult.canceled) return;
     const file = filePickerResult.filePaths[0];
     const ext = path.extname(file).toLowerCase().slice(1);
 

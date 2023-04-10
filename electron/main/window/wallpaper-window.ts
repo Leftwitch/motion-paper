@@ -86,10 +86,10 @@ export class WallpaperWindow {
     if (browserUrl) {
       console.log(browserUrl);
       this._window.loadURL(browserUrl).then(() => this._window?.show());
+      this._window.webContents.openDevTools();
     } else {
-      //TODO index.html loading
+      this._window.loadFile(join(process.env.DIST, "index.html"));
     }
-    this._window.webContents.openDevTools();
   }
 
   registerIPCHandlers() {
