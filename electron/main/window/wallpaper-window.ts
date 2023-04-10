@@ -88,7 +88,7 @@ export class WallpaperWindow {
       this._window.loadURL(browserUrl).then(() => this._window?.show());
       this._window.webContents.openDevTools();
     } else {
-      this._window.loadFile(join(process.env.DIST, "index.html"));
+      this._window.loadFile("dist/index.html").then(() => this._window?.show());
     }
   }
 

@@ -30,7 +30,7 @@
     "global-mouse-events": "github:Leftwitch/global-mouse-events",
     "gsap": "^3.11.5",
     "react-router-dom": "^6.10.0",
-    "regedit": "^5.1.2"
+    "windows": "^0.1.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.32.0",
@@ -52,13 +52,5 @@
   },
   "engines": {
     "node": "^14.18.0 || >=16.0.0"
-  },
-  "build": {
-    "extraResources": [
-        {
-            "from": "node_modules/regedit/vbs",
-            "to": "vbs"
-        }
-    ]
-}
+  }
 }

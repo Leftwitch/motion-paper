@@ -1,6 +1,5 @@
 import { app, Menu, Tray } from "electron";
 import { join } from "node:path";
-import path from "path";
 import { WallpaperConfigHandler } from "./wallpaper-config-handler";
 import { WallpaperHandler } from "./wallpaper-handler";
 import { SettingsWindow } from "./window/settings-window";
@@ -13,9 +12,6 @@ process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
 const handler = new WallpaperHandler();
 export const config = new WallpaperConfigHandler();
 const settingsWindow = new SettingsWindow();
-
-const vbsDirectory = path.resolve("./vbs");
-require("regedit").setExternalVBSLocation(vbsDirectory);
 
 config.loadConfig();
 Menu.setApplicationMenu(null);

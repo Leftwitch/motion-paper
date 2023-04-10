@@ -1,11 +1,10 @@
 import { Breadcrumb, IBreadcrumbItem, IDividerAsProps, Text, Toggle } from "@fluentui/react";
 import { ipcRenderer } from "electron";
 import { useEffect, useState } from "react";
-import { RegistryItemValue } from "regedit";
 import SettingsEntry from "../ui/SettingsEntry";
 function SettingsWallpaper() {
 
-    const [registry, setRegistry] = useState<{ [key: string]: RegistryItemValue }>()
+    const [registry, setRegistry] = useState<{ [key: string]: { value: number } }>()
 
 
     useEffect(() => {
@@ -24,45 +23,27 @@ function SettingsWallpaper() {
 
     ]
 
+    console.log(registry?.['SystemUsesLightTheme'])
     const lightModeOsEnabled = registry?.['SystemUsesLightTheme']?.value == 1;
     const lightModeAppsEnabled = registry?.['AppsUseLightTheme']?.value == 1;
     const colorPrevalenceEnabled = registry?.['ColorPrevalence']?.value == 1;
     const transparencyEnabled = registry?.['EnableTransparency']?.value == 1;
 
     const setOsLightMode = (light: boolean) => {
-        ipcRenderer.invoke('update-registry', {
-            "SystemUsesLightTheme": {
-                "type": "REG_DWORD",
-                "value": light ? 1 : 0,
-            }
-        },)
+        ipcRenderer.invoke('update-registry', "SystemUsesLightTheme", light ? 1 : 0)
     }
 
     const setAppLightMode = (light: boolean) => {
-        ipcRenderer.invoke('update-registry', {
-            "AppsUseLightTheme": {
-                "type": "REG_DWORD",
-                "value": light ? 1 : 0,
-            }
-        },)
+        ipcRenderer.invoke('update-registry', "AppsUseLightTheme", light ? 1 : 0)
     }
 
     const setColorPrevalance = (enabled: boolean) => {
-        ipcRenderer.invoke('update-registry', {
-            "ColorPrevalence": {
-                "type": "REG_DWORD",
-                "value": enabled ? 1 : 0,
-            }
-        },)
+        ipcRenderer.invoke('update-registry', "ColorPrevalence", enabled ? 1 : 0)
+
     }
 
     const setTransparency = (enabled: boolean) => {
-        ipcRenderer.invoke('update-registry', {
-            "EnableTransparency": {
-                "type": "REG_DWORD",
-                "value": enabled ? 1 : 0,
-            }
-        },)
+        ipcRenderer.invoke('update-registry', "EnableTransparency", enabled ? 1 : 0)
     }
     /*
         {

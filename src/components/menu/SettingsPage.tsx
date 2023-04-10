@@ -4,14 +4,14 @@ import { createRef, useEffect } from "react";
 import {
     Outlet,
     RouterProvider,
-    createBrowserRouter,
-    useLocation,
+    createHashRouter,
+    useLocation
 } from "react-router-dom";
 import SettingsExplorer from "./pages/SettingsExplorer";
 import SettingsWallpaper from "./pages/SettingsWallpaper";
 import SettingsSidebar from "./sidebar/SettingsSidebar";
 
-const router = createBrowserRouter([
+const router = createHashRouter([
     {
         path: '/',
         element: <AppLayout />,

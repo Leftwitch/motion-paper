@@ -2,7 +2,7 @@ import { Display, screen } from "electron";
 import { WallpaperWindow } from ".\\window\\wallpaper-window";
 
 export class WallpaperHandler {
-  private readonly windows: WallpaperWindow[] = [];
+  private windows: WallpaperWindow[] = [];
 
   initialize() {
     screen.addListener("display-added", this.displayAdded.bind(this));
@@ -22,6 +22,7 @@ export class WallpaperHandler {
   displayRemoved(event: Event | null, display: Display) {
     const win = this.windows.find((window) => window.display.id == display.id);
     win?.destroy();
+    this.windows = this.windows.filter((win) => win.display.id != display.id);
   }
   displayAdded(event: Event | null, display: Display) {
     this.createWallpaperWindowForDisplay(display);

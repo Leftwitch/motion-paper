@@ -2,15 +2,17 @@ import { app, dialog, Display, screen } from "electron";
 import { BrowserWindow } from "electron-acrylic-window";
 import { join } from "node:path";
 import path from "path";
-import { promisified as regedit, RegistryItemValue } from "regedit";
 import { config } from "..";
+//@ts-ignore
+import { registry } from "windows";
+
 const browserUrl = process.env.VITE_DEV_SERVER_URL;
 const preload = join(__dirname, "../preload/index.js");
 
 export class SettingsWindow {
   private _initialized = false;
   public window: BrowserWindow | null = null;
-  private windowsRegistryCache?: { [key: string]: RegistryItemValue };
+  private _windowsRegistryCache: any = null;
 
   initialize() {
     if (this._initialized) {
@@ -37,17 +39,19 @@ export class SettingsWindow {
     });
 
     this.window?.webContents.ipc.handle("get-registry", (event) => {
-      return this.windowsRegistryCache;
+      return this._windowsRegistryCache;
     });
 
-    this.window?.webContents.ipc.handle("update-registry", (event, data) => {
-      regedit.putValue({
-        "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize":
-          {
-            ...data,
-          },
-      });
-    });
+    this.window?.webContents.ipc.handle(
+      "update-registry",
+      (event, key, value) => {
+        const reg = registry(
+          "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        );
+        reg.remove(key);
+        reg.add(key, value);
+      },
+    );
     this.window?.webContents.ipc.handle("get-screens", (event) => {
       const screens = screen.getAllDisplays();
       return screens.map((screen) => ({
@@ -62,19 +66,20 @@ export class SettingsWindow {
   }
 
   updateRegistryCache() {
-    regedit.list([
+    if (!this.window?.isVisible()) return;
+    const reg = registry(
       "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-    ]).then((rs) => {
-      const values = Object.values(rs)[0].values;
-      if (JSON.stringify(this.windowsRegistryCache) != JSON.stringify(values)) {
-        console.log("CHANGE EVNT");
-        this.windowsRegistryCache = values;
-        this.window?.webContents.send(
-          "registry-change",
-          values,
-        );
-      }
-    });
+    );
+
+    if (JSON.stringify(this._windowsRegistryCache) != JSON.stringify(reg)) {
+      console.log("CHANGE EVNT");
+      this._windowsRegistryCache = reg;
+      console.log(reg);
+      this.window?.webContents.send(
+        "registry-change",
+        reg,
+      );
+    }
   }
 
   createBrowserWindow() {
@@ -107,7 +112,7 @@ export class SettingsWindow {
       this.window.loadURL(browserUrl);
       this.window.webContents.openDevTools();
     } else {
-      this.window.loadFile(join(process.env.DIST, "index.html"));
+      this.window.loadFile("dist/index.html");
     }
   }
 
