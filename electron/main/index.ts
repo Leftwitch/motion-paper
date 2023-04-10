@@ -1,6 +1,7 @@
 import { app } from "electron";
 import { join } from "node:path";
 import { WallpaperHandler } from "./wallpaper-handler";
+import { ApplicationWindow } from "./window/application-window";
 
 const handler = new WallpaperHandler();
 
@@ -29,5 +30,8 @@ app.on("quit", () => handler.destroy());
 
 app.whenReady().then(() => {
   console.log(process.env.DIST_ELECTRON);
-  handler.initialize();
+  const window = new ApplicationWindow();
+  window.initialize();
+
+  // handler.initialize();
 });

@@ -18,6 +18,7 @@ function WallpaperVideoRenderer({ wallpaper }: { wallpaper: Wallpaper }) {
             video.play();
         })
 
+
     }, [videoRef])
     return (<video ref={videoRef} src={videoSrc.path} id="video"></video>)
 

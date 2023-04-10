@@ -37,6 +37,7 @@ export class WallpaperWindow {
     );
     screen.addListener("display-removed", this.displayRemoved.bind(this));
     this.createBrowserWindow();
+    this.registerWindowModeHandler();
 
     mouseEvents.on("mousemove", (data) => {
       const { x, y } = data;
@@ -89,14 +90,21 @@ export class WallpaperWindow {
 
     this._window.addListener("closed", this.destroy.bind(this));
     attachBackground(this._window);
-
     this.updateBounds(false);
 
     if (browserUrl) {
       console.log(browserUrl);
       this._window.loadURL(browserUrl);
+    } else {
+      //TODO index.html loading
     }
     this._window.webContents.openDevTools();
+  }
+
+  registerWindowModeHandler() {
+    this._window?.webContents.ipc.handle("window-mode", (data) => {
+      return "wallpaper";
+    });
   }
 
   displayRemoved(_: Event, display: Display) {
