@@ -1,12 +1,14 @@
 import WallpaperRendererHandler from "@/components/wallpaper-renderer/WallpaperRendererHandler";
-import WallpaperVideoRenderer from "@/components/wallpaper-renderer/video/WallpaperVideoRenderer";
 import { Wallpaper } from "@/types/wallpaper";
-import { Breadcrumb, IBreadcrumbItem, IDividerAsProps, Text } from "@fluentui/react";
+import { Breadcrumb, IBreadcrumbItem, IDividerAsProps, Slider, Text } from "@fluentui/react";
+import { WallpaperFilled } from "@fluentui/react-icons";
 import { Display, ipcRenderer } from "electron";
 import { useEffect, useState } from "react";
 import SettingsEntry from "../ui/SettingsEntry";
 import SettingsMonitorFrame from "../ui/SettingsMonitorFrame";
+
 function SettingsWallpaper() {
+    const sliderValueFormat = (value: number) => `${value > 0 ? '+' : ''}${value}%`;
 
     const [screens, setScreens] = useState<{ screen: Display, wallpaper: Wallpaper }[]>([])
     const [activeScreen, setActiveScreen] = useState<Display>();
@@ -38,10 +40,10 @@ function SettingsWallpaper() {
         { text: 'Wallpapers', key: 'wp', as: 'h1' },
 
     ]
-
-    const test: Wallpaper = {
-        type: "VIDEO",
-        source: { path: "file:///C:/Users/justi/Downloads/tunnel-27438.mp4" },
+    const changeWallpaper = () => {
+        ipcRenderer.invoke('set-wallpaper', activeScreen).then(() => {
+            console.log('CHANGED')
+        })
     }
 
     return (<div className="flex flex-col overflow-hidden gap-y-6">
@@ -62,20 +64,56 @@ function SettingsWallpaper() {
                     <div key={element.screen.id} className="w-96 cursor-pointer" onClick={() => setActiveScreen(element.screen)}>
                         <SettingsMonitorFrame selected={activeScreen?.id == element.screen.id} >
                             <WallpaperRendererHandler wallpaper={element.wallpaper}></WallpaperRendererHandler>
-                            <WallpaperVideoRenderer wallpaper={test} ></WallpaperVideoRenderer>
                         </SettingsMonitorFrame>
                     </div>
                 )
             }
         </div>
 
-        <div className="flex flex-col ">
+        <div className="flex flex-col gap-y-1">
+
             <SettingsEntry>
-                <h1>LEL</h1>
-                <Text>
-                    This settings allows you to switch between dark & light mode on your machine
-                </Text>
+                <div className="flex items-center gap-x-4">
+                    <WallpaperFilled fontSize={30} />
+                    <div className="flex flex-col">
+
+                        <Text variant="large">
+                            Select new Wallpaper
+                        </Text>
+
+                    </div>
+
+                    <div className="ml-auto flex items-center gap-x-3 ">
+                        <button onClick={changeWallpaper} className="bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                            <Text variant="medium">
+                                Browse Wallpapers
+                            </Text>
+                        </button>
+                    </div>
+                </div>
             </SettingsEntry>
+
+
+
+            <SettingsEntry>
+                <div className="flex items-center">
+                    <div className="flex flex-col">
+                        <Text variant="large">
+                            Wallpaper Playback-Speed
+                        </Text>
+                        <Text>
+                            This determines how fast your video is playing
+                        </Text>
+                    </div>
+
+                    <div className="ml-auto flex items-center gap-x-3 w-80 h-16 ">
+                        <Slider className="w-full" valueFormat={sliderValueFormat}
+                            min={-100} max={200} step={5} defaultValue={0} showValue originFromZero />
+                    </div>
+                </div>
+            </SettingsEntry>
+
+
         </div>
 
     </div>

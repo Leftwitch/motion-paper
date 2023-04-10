@@ -15,7 +15,9 @@ export type WallpaperSplineSource = {
   splineCodeUrl: string;
 };
 
-export type WallpaperImageSource = WallpaperVideoSource;
+export type WallpaperImageSource = WallpaperVideoSource & {
+  speed: number;
+};
 
 export type WallpaperUrlSource = {
   url: string;

@@ -20,7 +20,9 @@ function WallpaperVideoRenderer({ wallpaper }: { wallpaper: Wallpaper }) {
 
 
     }, [videoRef])
-    return (<video ref={videoRef} src={videoSrc.path} id="video"></video>)
+    return (<video ref={videoRef} id="video" preload="none" >
+        <source src={videoSrc.path}></source>
+    </video>)
 
 }
 export default WallpaperVideoRenderer;

@@ -1,15 +1,19 @@
-import { app } from "electron";
+import { app, Menu } from "electron";
 import { join } from "node:path";
+import { WallpaperConfigHandler } from "./wallpaper-config-handler";
 import { WallpaperHandler } from "./wallpaper-handler";
 import { SettingsWindow } from "./window/settings-window";
-
-const handler = new WallpaperHandler();
 
 process.env.DIST_ELECTRON = join(__dirname, "../");
 process.env.DIST = join(process.env.DIST_ELECTRON, "../dist");
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
   ? join(process.env.DIST_ELECTRON, "../public")
   : process.env.DIST;
+
+const handler = new WallpaperHandler();
+export const config = new WallpaperConfigHandler();
+config.loadConfig();
+Menu.setApplicationMenu(null);
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -20,17 +24,12 @@ app.on("window-all-closed", () => {
   app.quit();
 });
 
-app.on("second-instance", () => {
-});
-
-app.on("activate", () => {
-});
-
+app.on("second-instance", () => {});
+app.on("activate", () => {});
 app.on("quit", () => handler.destroy());
 
 app.whenReady().then(() => {
-  console.log(process.env.DIST_ELECTRON);
   const window = new SettingsWindow();
   window.initialize();
-  // handler.initialize();
+  handler.initialize();
 });

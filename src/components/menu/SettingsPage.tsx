@@ -52,15 +52,17 @@ function AppLayout() {
     const contentRef = createRef<HTMLDivElement>();
 
     useEffect(() => {
-        gsap.fromTo(contentRef.current, { opacity: 0, y: 100 }, { opacity: 1, y: 0, duration: 0.4 })
+        gsap.fromTo(contentRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4 })
     }, [location]);
 
     return <ThemeProvider theme={darkTheme} style={{ height: '100%', background: 'rgba(0,0,0,0)' }}>
         <div className="pt-6 w-full h-full box-border">
             <div className="flex w-full h-full box-border">
                 <SettingsSidebar />
-                <div ref={contentRef} className="flex-1 px-10 box-border h-full w-full overflow-auto">
-                    <Outlet />
+                <div className="flex-1 px-10 box-border h-full w-full overflow-hidden">
+                    <div ref={contentRef} className="overflow-auto">
+                        <Outlet />
+                    </div>
                 </div>
             </div>
         </div>

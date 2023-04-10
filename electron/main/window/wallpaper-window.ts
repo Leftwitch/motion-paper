@@ -1,17 +1,11 @@
-import {
-  app,
-  BrowserWindow,
-  Display,
-  ipcMain,
-  IpcMainEvent,
-  screen,
-} from "electron";
+import { app, BrowserWindow, Display, screen } from "electron";
 import {
   attach as attachBackground,
   refresh as refreshBackground,
 } from "electron-as-wallpaper";
 import mouseEvents from "global-mouse-events";
 import { join } from "node:path";
+import { config } from "..";
 import { Wallpaper } from "../types/wallpaper";
 
 const browserUrl = process.env.VITE_DEV_SERVER_URL;
@@ -19,11 +13,11 @@ const preload = join(__dirname, "../preload/index.js");
 
 export class WallpaperWindow {
   private _initialized = false;
-  private _displayedWallpaper: Wallpaper | null = null;
   private _window: BrowserWindow | null = null;
+  private _wallpaper: Wallpaper | null = null;
 
   constructor(
-    private readonly _display: Display,
+    public readonly display: Display,
   ) {}
 
   initialize() {
@@ -31,28 +25,25 @@ export class WallpaperWindow {
       throw new Error("Window already initialized");
     }
 
-    screen.addListener(
-      "display-metrics-changed",
-      this.metricChanged.bind(this),
-    );
-    screen.addListener("display-removed", this.displayRemoved.bind(this));
+    this.reloadFromConfig();
+    this.hookConfigEvents();
     this.createBrowserWindow();
-    this.registerWindowModeHandler();
+    this.registerIPCHandlers();
+    this.hookMouseEvents();
 
+    this._initialized = true;
+  }
+
+  hookMouseEvents() {
     mouseEvents.on("mousemove", (data) => {
-      const { x, y } = data;
+      const currentScreen = screen.getDisplayNearestPoint(data);
+      if (currentScreen.id != this.display.id) return;
 
-      const currentScreen = screen.getDisplayNearestPoint({
-        x,
-        y,
-      });
-
-      if (currentScreen.id != this._display.id) return;
       const { bounds } = currentScreen;
 
       // Calculate the relative coordinates by subtracting the screen's top-left corner
-      const relativeX = x - bounds.x;
-      const relativeY = y - bounds.y;
+      const relativeX = data.x - bounds.x;
+      const relativeY = data.y - bounds.y;
 
       this._window?.webContents.sendInputEvent({
         type: "mouseMove",
@@ -60,18 +51,19 @@ export class WallpaperWindow {
         y: relativeY,
       });
     });
-
-    this._initialized = true;
   }
 
   destroy() {
-    screen.removeListener("display-metrics-changed", this.metricChanged);
-    screen.removeListener("display-removed", this.displayRemoved);
+    this._window?.destroy();
+    config.removeListener("update", this.reloadFromConfig);
     refreshBackground();
   }
 
+  hookConfigEvents() {
+    config.on("update", this.reloadFromConfig.bind(this));
+  }
+
   createBrowserWindow() {
-    refreshBackground();
     this._window = new BrowserWindow({
       title: app.getName() + "- Window",
       icon: join(process.env.PUBLIC, "favicon.ico"),
@@ -88,65 +80,47 @@ export class WallpaperWindow {
       },
     });
 
-    this._window.addListener("closed", this.destroy.bind(this));
     attachBackground(this._window);
     this.updateBounds(false);
 
     if (browserUrl) {
       console.log(browserUrl);
-      this._window.loadURL(browserUrl);
+      this._window.loadURL(browserUrl).then(() => this._window?.show());
     } else {
       //TODO index.html loading
     }
     this._window.webContents.openDevTools();
   }
 
-  registerWindowModeHandler() {
+  registerIPCHandlers() {
     this._window?.webContents.ipc.handle("window-mode", (data) => {
       return "wallpaper";
     });
+
+    this._window?.webContents.ipc.handle(
+      "get-wallpaper",
+      () => this.getWallpaper(),
+    );
   }
 
-  displayRemoved(_: Event, display: Display) {
-    if (display.id == this._display.id) {
-      this._window?.destroy();
+  reloadFromConfig() {
+    const wallpaper =
+      config.getConfigForDisplay(this.display)?.wallpaperSettings ?? null;
+
+    if (JSON.stringify(wallpaper) != JSON.stringify(this._wallpaper)) {
+      console.log("Set wallpaper to");
+      console.log(wallpaper);
+      this._wallpaper = wallpaper;
+      this._window?.webContents.send("wallpaper-changed", wallpaper);
     }
   }
 
-  metricChanged() {
-    this.updateBounds();
+  getWallpaper() {
+    return this._wallpaper;
   }
 
   updateBounds(checkDestroy = true) {
     if (this._window?.isDestroyed && checkDestroy) return;
-    this._window?.setBounds(this._display.bounds);
-  }
-
-  setWallpaper(wallpaper?: Wallpaper | null) {
-    if (!wallpaper) {
-      this._window?.hide();
-      return;
-    }
-
-    const eventCallback = (event: IpcMainEvent) => {
-      if (event.sender.id != this._window?.webContents.id) return;
-      this._window?.webContents.send(
-        "wallpaper-changed",
-        this._displayedWallpaper,
-      );
-
-      ipcMain.removeListener("wallpaper-ready", eventCallback);
-    };
-
-    ipcMain.on("wallpaper-ready", eventCallback);
-
-    this._displayedWallpaper = wallpaper;
-    this._window?.show();
-
-    //Set wallpaper manually in case this isnt the first load, we dont need to wait for an event to happen
-    this._window?.webContents.send(
-      "wallpaper-changed",
-      this._displayedWallpaper,
-    );
+    this._window?.setBounds(this.display.bounds);
   }
 }

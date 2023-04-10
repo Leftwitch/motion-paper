@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 import SettingsPage from './components/menu/SettingsPage';
-import WallpaperRendererHandler from './components/wallpaper-renderer/WallpaperRendererHandler';
+import WallpaperPage from './components/wallpaper/WallpaperPage';
 
 console.log('[App.tsx]', `Hello world from Electron ${process.versions.electron}!`)
 
@@ -21,15 +21,8 @@ function App() {
 
   return (
     <div className="App">
-
-
-
-      {windowMode == 'wallpaper' && <WallpaperRendererHandler />}
+      {windowMode == 'wallpaper' && <WallpaperPage />}
       {windowMode == 'settings' && <SettingsPage />}
-
-
-
-
     </div>
   )
 }

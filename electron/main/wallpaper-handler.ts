@@ -6,6 +6,7 @@ export class WallpaperHandler {
 
   initialize() {
     screen.addListener("display-added", this.displayAdded.bind(this));
+    screen.addListener("display-removed", this.displayRemoved.bind(this));
 
     screen.getAllDisplays().forEach((display) =>
       this.displayAdded(null, display)
@@ -13,11 +14,15 @@ export class WallpaperHandler {
   }
 
   destroy() {
-    console.log("Destroy");
     screen.removeListener("display-added", this.displayAdded);
+    screen.removeListener("display-removed", this.displayRemoved);
     this.windows.forEach((window) => window.destroy());
   }
 
+  displayRemoved(event: Event | null, display: Display) {
+    const win = this.windows.find((window) => window.display.id == display.id);
+    win?.destroy();
+  }
   displayAdded(event: Event | null, display: Display) {
     this.createWallpaperWindowForDisplay(display);
   }
@@ -26,20 +31,6 @@ export class WallpaperHandler {
     const wallpaperWindow = new WallpaperWindow(display);
     wallpaperWindow.initialize();
 
-    wallpaperWindow.setWallpaper({
-      type: "VIDEO",
-      source: { path: "C:\\Users\\justi\\Downloads\\tunnel-27438.mp4" },
-    });
-
-    setTimeout(() => {
-      wallpaperWindow.setWallpaper({
-        type: "SPLINE",
-        source: {
-          splineCodeUrl:
-            "https://prod.spline.design/EmP-eiUvQAqEqWMq/scene.splinecode",
-        },
-      });
-    }, 5000);
     this.windows.push(wallpaperWindow);
   }
 }
