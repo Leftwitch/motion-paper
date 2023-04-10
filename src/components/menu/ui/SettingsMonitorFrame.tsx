@@ -13,8 +13,8 @@ function SettingsMonitorFrame({ children, selected }: Props) {
         setMonitor([e.target.width, e.target.height])
     }
 
-    const selectedClasses = 'border-solid border-purple-600 border-2 rounded-xl'
-    return <div className={`transition-all relative overflow-hidden ${selected ? selectedClasses : ''}`}>
+    const selectedClasses = '!border-purple-600'
+    return <div className={`relative overflow-hidden border-transparent border-solid border-2 rounded-xl ${selected ? selectedClasses : ''}`}>
         <img
             className="absolute z-20 top-0 left-0"
             src={monitorFrame}

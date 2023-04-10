@@ -25,8 +25,12 @@
     "@splinetool/react-spline": "^2.2.6",
     "electron-acrylic-window": "^0.5.11",
     "electron-as-wallpaper": "^0.0.2-dev",
+    "electron-titlebar-windows": "^3.0.0",
     "electron-updater": "^5.3.0",
-    "global-mouse-events": "github:Leftwitch/global-mouse-events"
+    "global-mouse-events": "github:Leftwitch/global-mouse-events",
+    "gsap": "^3.11.5",
+    "react-router-dom": "^6.10.0",
+    "regedit": "^5.1.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.32.0",

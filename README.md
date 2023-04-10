@@ -1,5 +1,5 @@
 # electron-vite-react
-
+<a target="_blank" href="https://icons8.com/icon/12160/folder">Folder</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 [![awesome-vite](https://awesome.re/mentioned-badge.svg)](https://github.com/vitejs/awesome-vite)
 ![GitHub stars](https://img.shields.io/github/stars/caoxiemeihao/vite-react-electron?color=fa6470)
 ![GitHub issues](https://img.shields.io/github/issues/caoxiemeihao/vite-react-electron?color=d8b22d)

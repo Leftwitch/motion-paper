@@ -6,16 +6,16 @@ import WallpaperImageRenderer from "./image/WallpaperImageRenderer";
 import WallpaperSplineRenderer from "./spline/WallpaperSplineHandler";
 import WallpaperVideoRenderer from "./video/WallpaperVideoRenderer";
 
-function WallpaperRendererHandler() {
+function WallpaperRendererHandler({ wallpaper }: { wallpaper: Wallpaper }) {
 
-    const [wallpaper, setWallpaper] = useState<Wallpaper | null>(null);
+    const [currentWallpaper, setCurrentWallpaper] = useState<Wallpaper | null>(wallpaper);
 
     useEffect(() => {
         ipcRenderer.send("wallpaper-ready", {});
         ipcRenderer.on("wallpaper-changed", function (event, store) {
             console.log("Wallpaper changed");
             console.log(store);
-            setWallpaper(store);
+            setCurrentWallpaper(store);
         });
 
 
@@ -29,10 +29,10 @@ function WallpaperRendererHandler() {
 
 
     return <div id="wallpaper-container">
-        {wallpaper?.type == 'VIDEO' && <WallpaperVideoRenderer wallpaper={wallpaper} />}
-        {wallpaper?.type == 'IMAGE' && <WallpaperImageRenderer wallpaper={wallpaper} />}
-        {wallpaper?.type == 'URL' && <WallpaperVideoRenderer wallpaper={wallpaper} />}
-        {wallpaper?.type == 'SPLINE' && <WallpaperSplineRenderer wallpaper={wallpaper} />}
+        {currentWallpaper?.type == 'VIDEO' && <WallpaperVideoRenderer wallpaper={currentWallpaper} />}
+        {currentWallpaper?.type == 'IMAGE' && <WallpaperImageRenderer wallpaper={currentWallpaper} />}
+        {currentWallpaper?.type == 'URL' && <WallpaperVideoRenderer wallpaper={currentWallpaper} />}
+        {currentWallpaper?.type == 'SPLINE' && <WallpaperSplineRenderer wallpaper={currentWallpaper} />}
     </div>
 
 }
