@@ -11,7 +11,9 @@ function WallpaperPage() {
     })
     useEffect(() => {
         getWallpaper();
-        ipcRenderer.on('wallpaper-changed', () => getWallpaper())
+        ipcRenderer.on('wallpaper-changed', (event, data) => {
+            setWallpaper(data)
+        })
     }, [])
 
     return <WallpaperRendererHandler wallpaper={wallpaper} />

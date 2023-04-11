@@ -11,14 +11,14 @@ function SettingsWallpaper() {
     const sliderValueFormat = (value: number) => `${value > 0 ? '+' : ''}${value}%`;
 
     const [screens, setScreens] = useState<{ screen: Display, wallpaper: Wallpaper }[]>([])
-    const [activeScreen, setActiveScreen] = useState<Display | null>(null);
+    const [activeScreenId, setActiveScreenId] = useState<number | null>(null);
 
     const updateScreens = (init: boolean) => {
         ipcRenderer.invoke('get-screens').then(screenList => {
             setScreens(screenList)
 
             if (init) {
-                setActiveScreen(screenList[0].screen)
+                setActiveScreenId(screenList[0].screen.id)
             }
         })
     }
@@ -41,7 +41,7 @@ function SettingsWallpaper() {
 
     ]
     const changeWallpaper = () => {
-        ipcRenderer.invoke('set-wallpaper', activeScreen);
+        ipcRenderer.invoke('set-wallpaper', activeScreenId);
     }
 
     return (<div className="flex flex-col overflow-hidden gap-y-6">
@@ -59,8 +59,8 @@ function SettingsWallpaper() {
         <div className="flex overflow-x-auto whitespace-nowrap pb-4 gap-x-5">
             {
                 screens.map(element =>
-                    <div key={element.screen.id} className="w-96 cursor-pointer" onClick={() => setActiveScreen(element.screen)}>
-                        <SettingsMonitorFrame selected={activeScreen?.id == element.screen.id} >
+                    <div key={element.screen.id} className="w-96 cursor-pointer" onClick={() => setActiveScreenId(element.screen.id)}>
+                        <SettingsMonitorFrame selected={activeScreenId == element.screen.id} >
                             <WallpaperRendererHandler wallpaper={element.wallpaper}></WallpaperRendererHandler>
                         </SettingsMonitorFrame>
                     </div>

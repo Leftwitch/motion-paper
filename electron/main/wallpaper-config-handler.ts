@@ -25,9 +25,12 @@ export class WallpaperConfigHandler extends events.EventEmitter {
   }
 
   updateConfig() {
+    //TODO RACE
     fs.writeFileSync(configPath, JSON.stringify(this.config));
     this.loadConfig();
-    this.emit("update", this.config);
+    setTimeout(() => {
+      this.emit("update", this.config);
+    }, 1000);
   }
 
   getConfigForDisplay(display: Display): WallpaperConfigEntry | null {

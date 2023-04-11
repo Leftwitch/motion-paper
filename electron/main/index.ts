@@ -1,5 +1,6 @@
-import { app, Menu, Tray } from "electron";
+import { app, Menu, nativeImage, Tray } from "electron";
 import { join } from "node:path";
+import path from "path";
 import { WallpaperConfigHandler } from "./wallpaper-config-handler";
 import { WallpaperHandler } from "./wallpaper-handler";
 import { SettingsWindow } from "./window/settings-window";
@@ -36,9 +37,9 @@ app.whenReady().then(() => {
 });
 
 function loadTray() {
-  const tray = new Tray(
-    "C:\\Users\\justi\\Desktop\\WallpaperEngine\\motion-paper\\public\\favicon.ico",
-  );
+  const iconPath = path.join(__dirname, "dist/favicon.ico");
+  const tray = new Tray(nativeImage.createFromPath(iconPath));
+
   tray.setToolTip("Motion Paper");
   const contextMenu = Menu.buildFromTemplate([
     {

@@ -1,4 +1,4 @@
-import { app, dialog, Display, screen } from "electron";
+import { app, dialog, screen } from "electron";
 import { BrowserWindow } from "electron-acrylic-window";
 import { join } from "node:path";
 import path from "path";
@@ -60,8 +60,8 @@ export class SettingsWindow {
       }));
     });
 
-    this.window?.webContents.ipc.handle("set-wallpaper", (event, display) => {
-      this.selectNewWallpaper(display);
+    this.window?.webContents.ipc.handle("set-wallpaper", (event, displayId) => {
+      this.selectNewWallpaper(displayId);
     });
   }
 
@@ -116,7 +116,7 @@ export class SettingsWindow {
     }
   }
 
-  async selectNewWallpaper(display: Display) {
+  async selectNewWallpaper(displayId: number) {
     if (!this.window) return;
     const imageExtensions = ["jpg", "png", "gif", "svg"];
     const videoExtensions = ["mkv", "avi", "mp4", "webm"];
@@ -136,6 +136,9 @@ export class SettingsWindow {
     });
 
     if (filePickerResult.canceled) return;
+    const display = screen.getAllDisplays().find((e) => e.id == displayId);
+    if (!display) return;
+
     const file = filePickerResult.filePaths[0];
     const ext = path.extname(file).toLowerCase().slice(1);
 

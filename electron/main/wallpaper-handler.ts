@@ -7,25 +7,41 @@ export class WallpaperHandler {
   initialize() {
     screen.addListener("display-added", this.displayAdded.bind(this));
     screen.addListener("display-removed", this.displayRemoved.bind(this));
+    screen.addListener(
+      "display-metrics-changed",
+      this.metricsChanged.bind(this),
+    );
+
+    this.reloadWallpapers();
+  }
+
+  reloadWallpapers() {
+    this.windows.forEach((window) => window.destroy());
+    this.windows = [];
 
     screen.getAllDisplays().forEach((display) =>
-      this.displayAdded(null, display)
+      this.createWallpaperWindowForDisplay(display)
     );
   }
 
   destroy() {
     screen.removeListener("display-added", this.displayAdded);
     screen.removeListener("display-removed", this.displayRemoved);
+    screen.removeListener("display-metrics-changed", this.metricsChanged);
     this.windows.forEach((window) => window.destroy());
+    this.windows = [];
+  }
+
+  metricsChanged(event: Event, display: Display) {
+    this.reloadWallpapers();
   }
 
   displayRemoved(event: Event | null, display: Display) {
-    const win = this.windows.find((window) => window.display.id == display.id);
-    win?.destroy();
-    this.windows = this.windows.filter((win) => win.display.id != display.id);
+    this.reloadWallpapers();
   }
+
   displayAdded(event: Event | null, display: Display) {
-    this.createWallpaperWindowForDisplay(display);
+    this.reloadWallpapers();
   }
 
   createWallpaperWindowForDisplay(display: Display) {
